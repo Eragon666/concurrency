@@ -14,7 +14,12 @@
 
 
 /* Add any functions you may need (like a worker) here. */
-
+void update_rotation(double **old, double **current, double **next){
+  double *temp = *old;
+  *old = *current;
+  *current = *next;
+  *next = temp;
+}
 
 /*
  * Executes the entire simulation.
@@ -32,26 +37,34 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
         double *old_array, double *current_array, double *next_array)
 {
 
-        
+    double tempray;    
     double temp1;
     double temp2;
     
     int i;
     int count;    
-    for(count = 0; count < t_max; count++0)   
+    for(count = 0; count < t_max; count++ )   
     {
         for(i = 1; i < i_max-1; i++) 
         {
             temp1 = (2 * current_array[i]) - old_array[i];
             temp2 = 0.15 * (current_array[i-1] - (2 * current_array[i] - current_array[i+1]));
             next_array[i] = temp1 + temp2;
+            
         }
+           
+        //printf("%d:  %f - %f - %f\n", count, old_array[1000], current_array[1000], next_array[1000]);
         /*
         * After each timestep, you should swap the buffers around. Watch out none
         * of the threads actually use the buffers at that time.
         */
         
-                
+        update_rotation(&old_array, &current_array, &next_array);
+
+        /*tempray = *old_array;
+        *old_array = *current_array;
+        *current_array = *next_array;
+        *next_array = tempray;*/
     }
     /* You should return a pointer to the array with the final results. */
     return current_array;
