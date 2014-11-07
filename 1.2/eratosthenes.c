@@ -140,6 +140,7 @@ void *filter(void *args) {
 }
 
 int main(int argc, char *argv[]) {
+	setbuf(stdout, NULL);
 	setup();
 	time(&start);
 	return 1;
