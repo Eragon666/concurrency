@@ -12,45 +12,35 @@
 #include <stdlib.h>
 #include "eratosthenes.h"
 
+time_t start, stop;
+
 /* Setup the buffer and other variabeles for running the algorithm */
 void setup() {
 	struct buffer *bffr;
 
-	bffr = initializeBuffer();	
+	bffr = initializeBuffer(1);	
 
 	pthread_t firstThread;
- 	
-	/*pthread_cond_t signal1 = PTHREAD_COND_INITIALIZER;
-	pthread_cond_t signal2 = PTHREAD_COND_INITIALIZER;
-	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-	
-	bffr.filled = 0;
-	bffr.in = 0;
-	bffr.out = 0;
-	bffr.lock = lock;
-	bffr.signal1 = signal1; 
-	bffr.signal2 = signal2;*/
 	
 	pthread_create(&firstThread, NULL, &filter, bffr);	
-
- 	//pthread_join(firstThread, &results);
 
 	generator(bffr);
 }
 
-struct buffer *initializeBuffer() {
+struct buffer *initializeBuffer(int id) {
 	struct buffer *bffr = malloc(sizeof(struct buffer));
 
 	pthread_cond_t signal1 = PTHREAD_COND_INITIALIZER;
 	pthread_cond_t signal2 = PTHREAD_COND_INITIALIZER;
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	
+	bffr->id = id;
 	bffr->filled = 0;
 	bffr->in = 0;
 	bffr->out = 0;
 	bffr->lock = lock;
-	bffr->signal1 = signal1; 
-	bffr->signal2 = signal2;
+	bffr->signal1 = signal1; //Wake up producer 
+	bffr->signal2 = signal2; //Wake up consumer
 
 	return bffr;
 }
@@ -61,9 +51,9 @@ void generator(struct buffer* bffr) {
 	do {
 		//Enter critical zone, trying to lock
 		pthread_mutex_lock(&bffr->lock); 
+
+		//Wait until the buffer isn't fully occupied anymore
 		while(!(bffr->filled < BUFFERSIZE)) {
-			//printf("Buffer is filled");
-			//exit(1);
 			pthread_cond_wait(&bffr->signal1, &bffr->lock);
 		}
 
@@ -74,7 +64,7 @@ void generator(struct buffer* bffr) {
 		//exit critical zone, unlock struct	
 		pthread_cond_signal(&bffr->signal2);
 		pthread_mutex_unlock(&bffr->lock);
-		//printf("%d", i);
+
 		i++;
 	} while (1);
 }
@@ -84,72 +74,73 @@ void generator(struct buffer* bffr) {
  * numbers are still potential prime numbers
  */
 void *filter(void *args) {
-	int prime;
-	int primeCandidate;
+	int primeTest, prime;
 
-	//printf("HELLO THERE");
+	//Get buffer from *args and initialize a new buffer
+	struct buffer *bffr, *newBffr;
+	bffr = (struct buffer *) args;
+	newBffr = initializeBuffer((bffr->id + 1));
 
-	struct buffer *buffer;
-	buffer = (struct buffer *) args;
+	//Enter critical zone
+	pthread_mutex_lock(&bffr->lock); 
 
-	pthread_mutex_lock(&buffer->lock); 
-
-	while(!(buffer->filled > 0)) {
-		pthread_cond_wait(&buffer->signal2, &buffer->lock);
+	while(!(bffr->filled > 0)) {
+		pthread_cond_wait(&bffr->signal2, &bffr->lock);
 	}
 
-	prime = buffer->naturalNum[buffer->out];
-	buffer->out = (buffer->out +1) % BUFFERSIZE;
-	buffer->filled = buffer->filled -1;
+	//Get the prime number and print 
+	prime = bffr->naturalNum[bffr->out];
+	printf("%d: %d\n", bffr->id, prime);
+
+	bffr->filled--;
+	bffr->out = (bffr->out + 1) % BUFFERSIZE;
 	
-	pthread_cond_signal(&buffer->signal1);
+	pthread_cond_signal(&bffr->signal1);
  
-	pthread_mutex_unlock(&buffer->lock);
+	pthread_mutex_unlock(&bffr->lock);	
 
-	printf("\nPRIME FOUND:%d\n ", prime);
-
-	struct buffer *newBuffer;
-
-	newBuffer = initializeBuffer();
+	//Start up the next thread
 	pthread_t nextThread;
-
-	pthread_create(&nextThread, NULL, &filter, newBuffer);
-
+	pthread_create(&nextThread, NULL, &filter, newBffr);
+	
 	do {
-		pthread_mutex_lock(&buffer->lock);
+		//Enter critical zone
+		pthread_mutex_lock(&bffr->lock);
 
-		while(!(buffer->filled > 0)) {
-            pthread_cond_wait(&buffer->signal2, &buffer->lock);
+		while(!(bffr->filled > 0)) {
+            pthread_cond_wait(&bffr->signal2, &bffr->lock);
         }
-        primeCandidate = buffer->naturalNum[buffer->out];
-        buffer->out = (buffer->out + 1) % BUFFERSIZE;
-        buffer->filled = buffer->filled - 1;
 
-        pthread_cond_signal(&buffer->signal1);
-        pthread_mutex_unlock(&buffer->lock);
+		//Get the number to test 
+        primeTest = bffr->naturalNum[bffr->out];
+		
+		bffr->filled--;
+        bffr->out = (bffr->out + 1) % BUFFERSIZE;
 
-        /* Check if the candidate is a multiple of the threads prime number. If
-         * not, the candidate is put in the buffer for the next filter thread.
-         */
-        if(primeCandidate % prime != 0) {
+        pthread_cond_signal(&bffr->signal1);
+        pthread_mutex_unlock(&bffr->lock);
 
-            pthread_mutex_lock(&newBuffer->lock);
-            while(!(newBuffer->filled < BUFFERSIZE)) {
-                pthread_cond_wait(&newBuffer->signal1, &newBuffer->lock);
+        //Check if the primeTest is a multiple of the prime number, if not add it to the next queue
+        if(primeTest % prime != 0) {
+
+            pthread_mutex_lock(&newBffr->lock);
+            while(!(newBffr->filled < BUFFERSIZE)) {
+                pthread_cond_wait(&newBffr->signal1, &newBffr->lock);
             }
-            newBuffer->naturalNum[newBuffer->in] = primeCandidate;
-            newBuffer->in = (newBuffer->in + 1) % BUFFERSIZE;
-            newBuffer->filled = newBuffer->filled + 1;
-            pthread_cond_signal(&newBuffer->signal2);
-            pthread_mutex_unlock(&newBuffer->lock);
+
+            newBffr->naturalNum[newBffr->in] = primeTest;
+            newBffr->filled++;
+			newBffr->in = (newBffr->in + 1) % BUFFERSIZE;
+
+	        pthread_cond_signal(&newBffr->signal2);
+            pthread_mutex_unlock(&newBffr->lock);
         }
 		
-	} while (1);
-
-	return 0;
+	} while (1); 
 }
 
 int main(int argc, char *argv[]) {
 	setup();
-	return 0;
+	time(&start);
+	return 1;
 }
