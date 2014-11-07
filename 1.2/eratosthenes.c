@@ -73,7 +73,9 @@ void generator(struct buffer* bffr) {
  * numbers are still potential prime numbers
  */
 void *filter(void *args) {
-	int primeTest, prime;
+	int primeTest, prime, created;
+
+	created = 0;
 
 	//Get buffer from *args and initialize a new buffer
 	struct buffer *bffr, *newBffr;
@@ -118,8 +120,11 @@ void *filter(void *args) {
         //Check if the primeTest is a multiple of the prime number, if not add it to the next queue and
 		//start a new thread for this number
         if(primeTest % prime != 0) {
-			pthread_t nextThread;
-			pthread_create(&nextThread, NULL, &filter, newBffr);
+			if (created == 0) {
+				pthread_t nextThread;
+				pthread_create(&nextThread, NULL, &filter, newBffr);
+				created = 1;
+			}
 
             pthread_mutex_lock(&newBffr->lock);
             while(!(newBffr->filled < BUFFERSIZE)) {
