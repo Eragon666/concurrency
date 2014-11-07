@@ -46,11 +46,6 @@ void update_rota(struct order* tarray){
   tarray->next = temp;
 }
 
-/* temp1 = (2 * current_array[i]) - old_array[i];
- * temp2 = 0.15 * (current_array[i-1] - (2 * current_array[i] - current_array[i+1]));
- * next_array[i] = temp1 + temp2;
- */
-
 void *Compute(void *arguments)
 {
 	struct list *args;
@@ -72,28 +67,23 @@ void *Compute(void *arguments)
         
 		
         pthread_mutex_lock(&count_mutex);
-        //printf("%d\n", args->arrays->semaphore);
 		if(args->arrays->semaphore > 1)
         { 
-			//printf("Hello5a\n");
             args->arrays->semaphore = args->arrays->semaphore-1;
             pthread_cond_wait(&start_line ,&count_mutex);
         } 
         else if (args->arrays->semaphore == 1)
         { 
-		    //printf("Hello5b\n");
             args->arrays->semaphore = args->nt;
             pthread_cond_signal(&swap_arrays);
             pthread_cond_wait(&start_line ,&count_mutex);
             
         }
-		//printf("Hello7\n");
         pthread_mutex_unlock(&count_mutex);
         pthread_cond_signal(&start_line);
         
     }
 }
-//0.944218 / 0.944219 / 0.9944207
 /*
  * Executes the entire simulation.
  *
@@ -129,7 +119,6 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     }
 
     pthread_t thread_ids[num_threads];
-    //pthread_mutex_lock( &count_mutex);
     
 	
     for (tc = 0; tc < num_threads; tc++)
@@ -148,10 +137,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
         pthread_mutex_lock( &count_mutex);
         pthread_cond_wait( &swap_arrays, &count_mutex);
          
-
-        //printf("1 %d:  %f - %f - %f\n", count, old_array[50000], current_array[50000], next_array[50000]);
-		//printf("2 %d:  %f - %f - %f\n", count, tarray->old[50000], tarray->current[50000], tarray->next[50000]);
-        /*
+       /*
         * After each timestep, you should swap the buffers around. Watch out none
         * of the threads actually use the buffers at that time.
         */
@@ -160,10 +146,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
 		update_rota(tarray);
         pthread_mutex_unlock( &count_mutex);
         pthread_cond_signal(&start_line);
-        /*tempray = *old_array;
-        *old_array = *current_array;
-        *current_array = *next_array;
-        *next_array = tempray;*/
+
     }
 	tarray->boole = 0;
 	
@@ -173,7 +156,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
             pthread_join(thread_ids[tc], NULL);
     }
 	current_array = tarray->current;
-	printf("%f\n", current_array[50000]); 
+	
 	free(tarray);
 	
     /* You should return a pointer to the array with the final results. */
