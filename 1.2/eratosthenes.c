@@ -90,7 +90,7 @@ void *filter(void *args) {
 
 	//Get the prime number and print 
 	prime = bffr->naturalNum[bffr->out];
-	printf("%d: %d\n", bffr->id, prime);
+	fprintf(stderr, "%d: %d\n", bffr->id, prime);
 
 	bffr->filled--;
 	bffr->out = (bffr->out + 1) % BUFFERSIZE;
@@ -140,7 +140,6 @@ void *filter(void *args) {
 }
 
 int main(int argc, char *argv[]) {
-	setbuf(stdout, NULL);
 	setup();
 	time(&start);
 	return 1;
