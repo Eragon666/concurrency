@@ -80,7 +80,6 @@ void *filter(void *args) {
 	//Get buffer from *args and initialize a new buffer
 	struct buffer *bffr, *newBffr;
 	bffr = (struct buffer *) args;
-	newBffr = initializeBuffer();
 
 	//Enter critical zone
 	pthread_mutex_lock(&bffr->lock); 
@@ -120,7 +119,9 @@ void *filter(void *args) {
         //Check if the primeTest is a multiple of the prime number, if not add it to the next queue and
 		//start a new thread for this number
         if(primeTest % prime != 0) {
+			//check if already created a thread, if not create. Else just add it to the output
 			if (created == 0) {
+				newBffr = initializeBuffer();
 				pthread_t nextThread;
 				pthread_create(&nextThread, NULL, &filter, newBffr);
 				created = 1;
