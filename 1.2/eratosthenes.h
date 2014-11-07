@@ -10,7 +10,6 @@
 #define BUFFERSIZE 1000
 
 struct buffer {
-	int id;
 	int naturalNum[BUFFERSIZE];
 	int filled;
 	int in;
@@ -21,6 +20,6 @@ struct buffer {
 };
 
 void setup(void);
-struct buffer *initializeBuffer(int id);
+struct buffer *initializeBuffer(void);
 void generator(struct buffer* bffr);
 void *filter(void *args);

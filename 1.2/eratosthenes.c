@@ -18,7 +18,7 @@ time_t start, stop;
 void setup() {
 	struct buffer *bffr;
 
-	bffr = initializeBuffer(1);	
+	bffr = initializeBuffer();	
 
 	pthread_t firstThread;
 	
@@ -27,14 +27,13 @@ void setup() {
 	generator(bffr);
 }
 
-struct buffer *initializeBuffer(int id) {
+struct buffer *initializeBuffer() {
 	struct buffer *bffr = malloc(sizeof(struct buffer));
 
 	pthread_cond_t signal1 = PTHREAD_COND_INITIALIZER;
 	pthread_cond_t signal2 = PTHREAD_COND_INITIALIZER;
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	
-	bffr->id = id;
 	bffr->filled = 0;
 	bffr->in = 0;
 	bffr->out = 0;
@@ -79,7 +78,7 @@ void *filter(void *args) {
 	//Get buffer from *args and initialize a new buffer
 	struct buffer *bffr, *newBffr;
 	bffr = (struct buffer *) args;
-	newBffr = initializeBuffer((bffr->id + 1));
+	newBffr = initializeBuffer();
 
 	//Enter critical zone
 	pthread_mutex_lock(&bffr->lock); 
@@ -88,9 +87,9 @@ void *filter(void *args) {
 		pthread_cond_wait(&bffr->signal2, &bffr->lock);
 	}
 
-	//Get the prime number and print 
+	//Get the prime number and print, use fprintf so it will print immidiately 
 	prime = bffr->naturalNum[bffr->out];
-	fprintf(stderr, "%d: %d\n", bffr->id, prime);
+	fprintf(stderr, "%d\n", prime);
 
 	bffr->filled--;
 	bffr->out = (bffr->out + 1) % BUFFERSIZE;
@@ -98,10 +97,6 @@ void *filter(void *args) {
 	pthread_cond_signal(&bffr->signal1);
  
 	pthread_mutex_unlock(&bffr->lock);	
-
-	//Start up the next thread
-	pthread_t nextThread;
-	pthread_create(&nextThread, NULL, &filter, newBffr);
 	
 	do {
 		//Enter critical zone
@@ -120,8 +115,11 @@ void *filter(void *args) {
         pthread_cond_signal(&bffr->signal1);
         pthread_mutex_unlock(&bffr->lock);
 
-        //Check if the primeTest is a multiple of the prime number, if not add it to the next queue
+        //Check if the primeTest is a multiple of the prime number, if not add it to the next queue and
+		//start a new thread for this number
         if(primeTest % prime != 0) {
+			pthread_t nextThread;
+			pthread_create(&nextThread, NULL, &filter, newBffr);
 
             pthread_mutex_lock(&newBffr->lock);
             while(!(newBffr->filled < BUFFERSIZE)) {
