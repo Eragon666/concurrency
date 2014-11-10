@@ -28,7 +28,7 @@ $(PROGNAME): $(OBJFILES)
 
 run: $(PROGNAME)
 	prun -v -np 1 $(PROGNAME) $(RUNARGS)
-
+	
 runlocal: $(PROGNAME)
 	./$(PROGNAME) $(RUNARGS)
 
