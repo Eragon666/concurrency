@@ -1,0 +1,14 @@
+set term png
+set output "plot-combined.png"
+set xlabel "# of threads"
+set ylabel "Time (sec)"
+
+plot 	"results-guided-5000-1.txt" title 'Guided: i = 1000, t = 500000' with lines,\
+	"results-guided-5000-2.txt" title 'Guided: i = 100000, t = 100000' with lines,\
+	"results-guided-5000-3.txt" title 'Guided: i = 10000000, t = 3500' with lines,\
+	"results-static-5000-1.txt" title 'Static: i = 1000, t = 500000' with lines,\
+	"results-static-5000-2.txt" title 'Static: i = 100000, t = 100000' with lines,\
+	"results-static-5000-3.txt" title 'Static: i = 10000000, t = 3500' with lines,\
+	"results-dynamic-5000-1.txt" title 'Dynamic: i = 1000, t = 500000' with lines,\
+	"results-dynamic-5000-2.txt" title 'Dynamic: i = 100000, t = 100000' with lines,\
+	"results-dynamic-5000-3.txt" title 'Dynamic: i = 10000000, t = 3500' with lines

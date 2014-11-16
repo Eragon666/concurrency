@@ -1,0 +1,14 @@
+set term png
+set output "plot-guided.png"
+set xlabel "# of threads"
+set ylabel "Time (sec)"
+
+plot 	"results-guided-100-1.txt" title 'i = 1000, t = 500000, c = 100' with lines,\
+	"results-guided-100-2.txt" title 'i = 100000, t = 100000, c = 100' with lines,\
+	"results-guided-100-3.txt" title 'i = 10000000, t = 3500, c = 100' with lines,\
+	"results-guided-1000-1.txt" title 'i = 1000, t = 500000, c = 1000' with lines,\
+	"results-guided-1000-2.txt" title 'i = 100000, t = 100000, c = 1000' with lines,\
+	"results-guided-1000-3.txt" title 'i = 10000000, t = 3500, c = 1000' with lines,\
+	"results-guided-5000-1.txt" title 'i = 1000, t = 500000, c = 5000' with lines,\
+	"results-guided-5000-2.txt" title 'i = 100000, t = 100000, c = 5000' with lines,\
+	"results-guided-5000-3.txt" title 'i = 10000000, t = 3500, c = 5000' with lines
