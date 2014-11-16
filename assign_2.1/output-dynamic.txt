@@ -1,0 +1,32 @@
+1000 500000 1,2,4,8
+Took 12.7507 seconds
+Normalized: 2.55014e-08 seconds
+Took 49.8741 seconds
+Normalized: 9.97482e-08 seconds
+Took 44.3995 seconds
+Normalized: 8.87989e-08 seconds
+Took 32.6942 seconds
+Normalized: 6.53883e-08 seconds
+Took 53.3107 seconds
+Normalized: 1.06621e-07 seconds
+
+10000 250000 1,2,4,6,8
+Took 64.5192 seconds
+Normalized: 2.58077e-08 seconds
+Took 255.565 seconds
+Normalized: 1.02226e-07 seconds
+Took 231.342 seconds
+Normalized: 9.25369e-08 seconds
+Took 276.463 seconds
+Normalized: 1.10585e-07 seconds
+Took 247.722 seconds
+Normalized: 9.9089e-08 seconds
+
+100000 100000 1,2,4,6,8
+Took 263.475 seconds
+Normalized: 2.63475e-08 seconds
+
+1000000 20000 1,2,4,6,8
+
+10000000 3500 1,2,4,6,8
+

@@ -1,0 +1,60 @@
+1000 500000 1,2,4,8
+Took 1.64238 seconds
+Normalized: 3.28475e-09 seconds
+Took 2.41207 seconds
+Normalized: 4.82414e-09 seconds
+Took 2.8126 seconds
+Normalized: 5.6252e-09 seconds
+Took 3.06698 seconds
+Normalized: 6.13396e-09 seconds
+Took 3.4523 seconds
+Normalized: 6.9046e-09 seconds
+
+10000 250000 1,2,4,6,8
+Took 7.708 seconds
+Normalized: 3.0832e-09 seconds
+Took 8.14184 seconds
+Normalized: 3.25673e-09 seconds
+Took 8.62396 seconds
+Normalized: 3.44958e-09 seconds
+Took 9.27182 seconds
+Normalized: 3.70873e-09 seconds
+Took 9.58382 seconds
+Normalized: 3.83353e-09 seconds
+
+100000 100000 1,2,4,6,8
+Took 35.9383 seconds
+Normalized: 3.59383e-09 seconds
+Took 20.2746 seconds
+Normalized: 2.02746e-09 seconds
+Took 14.461 seconds
+Normalized: 1.4461e-09 seconds
+Took 13.6562 seconds
+Normalized: 1.36562e-09 seconds
+Took 14.4124 seconds
+Normalized: 1.44124e-09 seconds
+
+1000000 20000 1,2,4,6,8
+Took 65.7525 seconds
+Normalized: 3.28762e-09 seconds
+Took 36.3419 seconds
+Normalized: 1.8171e-09 seconds
+Took 27.1671 seconds
+Normalized: 1.35836e-09 seconds
+Took 29.268 seconds
+Normalized: 1.4634e-09 seconds
+Took 28.4245 seconds
+Normalized: 1.42123e-09 seconds
+
+10000000 3500 1,2,4,6,8
+Took 113.045 seconds
+Normalized: 3.22986e-09 seconds
+Took 70.0306 seconds
+Normalized: 2.00087e-09 seconds
+Took 61.4093 seconds
+Normalized: 1.75455e-09 seconds
+Took 61.8866 seconds
+Normalized: 1.76819e-09 seconds
+Took 62.564 seconds
+Normalized: 1.78754e-09 seconds
+
