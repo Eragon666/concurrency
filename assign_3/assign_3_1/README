@@ -1,7 +1,12 @@
-Assignment 3.1 - Framework
+Assignment 2.1 - Framework
 Wave equation simulation
 Author: Koen Koning
 
+
+NOTE FOR USING MPI:
+Be sure to execute
+ $ module load openmpi/gcc
+before compiling MPI assignments
 
 This framework provides some basic code which handles most of the I/O and
 timing. Therefore, you only have to implement the simulation itself using
