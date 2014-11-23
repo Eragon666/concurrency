@@ -34,9 +34,9 @@ int mod(int a, int b)
 int main(int argc, char **argv)
 {
 	char buffer[32] = {0}; //Buffer
-	int i, rank, size, conn, sender;
+	int rank, size, conn, sender;
 	int messagesize = 32;
-	const int root = 4;
+	const int root = 0; //can be changed to another value smaller then size.
 
 	//Setup MPI, if an error occured exit.
 	conn = MPI_Init(&argc, &argv);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	{
 		strcpy(buffer, "Hello, world");
 		messagesize = strlen(buffer) + 1;
-		printf("I (task %d of %d total tasks) will broadcast: %s\n", rank, size, buffer);
+		printf("I (task %d of %d total tasks) will broadcast: %s\n", rank, size+1, buffer);
 	}
 
 	//Test to check if the buffer is really empty before receiving anything
