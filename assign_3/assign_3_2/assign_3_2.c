@@ -33,10 +33,12 @@ int mod(int a, int b)
 
 int main(int argc, char **argv)
 {
-	char buffer[32] = {0}; //Buffer
+	const int maxBuffer = 32;
+	char buffer[maxBuffer]; //Buffer
 	int rank, size, conn, sender;
-	int messagesize = 32;
+	int messagesize = maxBuffer;
 	const int root = 0; //can be changed to another value smaller then size.
+	char sendmessage[] = "Hello, world!";
 
 	//Setup MPI, if an error occured exit.
 	conn = MPI_Init(&argc, &argv);
@@ -51,9 +53,14 @@ int main(int argc, char **argv)
 	//Only the root will broadcast a message
 	if (rank == root)
 	{
-		strcpy(buffer, "Hello, world");
-		messagesize = strlen(buffer) + 1;
-		printf("I (task %d of %d total tasks) will broadcast: %s\n", rank, size+1, buffer);
+		messagesize = strlen(sendmessage) + 1;
+		//Check if the message is not bigger then the buffer
+		if (messagesize > maxBuffer) {
+			fprintf(stderr, "Messagesize is to big for the current buffer. Aborting!\n");
+			MPI_Abort(MPI_COMM_WORLD, conn);
+		}
+		strcpy(buffer, sendmessage);
+		printf("I (task %d of %d total tasks) will broadcast: %s\n", rank, size-1, buffer);
 	}
 
 	//Test to check if the buffer is really empty before receiving anything
