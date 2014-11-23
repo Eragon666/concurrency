@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "mpi.h"
 #include "file.h"
 #include "timer.h"
 #include "simulate.h"
@@ -45,11 +46,21 @@ void fill(double *array, int offset, int range, double sample_start,
     }
 }
 
+void fillmpi(double *array, int offset, int range, int  double sample_start,
+        double sample_end, func_t f)
+{
+    int i;
+    float dx;
+
+    dx = (sample_end - sample_start) / range;
+    for (i = 1; i < 
+
+}
 
 int main(int argc, char *argv[])
 {
     double *old, *current, *next, *ret;
-    int t_max, i_max;
+    int t_max, i_max, rc, rank, i, size;
     double time;
 
     /* Parse commandline args */
@@ -87,6 +98,7 @@ int main(int argc, char *argv[])
     old = malloc(i_max * sizeof(double));
     current = malloc(i_max * sizeof(double));
     next = malloc(i_max * sizeof(double));
+	buffer = malloc(i_max * sizeof(double));
 
     if (old == NULL || current == NULL || next == NULL) {
         fprintf(stderr, "Could not allocate enough memory, aborting.\n");
@@ -126,21 +138,56 @@ int main(int argc, char *argv[])
         fill(old, 1, i_max/4, 0, 2*3.14, sin);
         fill(current, 2, i_max/4, 0, 2*3.14, sin);
     }
+	
+	
+    
 
-    timer_start();
-
+	rc = MPI_INIT(&argc, &argv);
+	
+	if (rc != MPI_SUCCESS)
+    {
+        fprintf(stderr, "Unable to set up MPI");
+        MPI_Abort(MPI_COMM_WORLD, rc);    
+    }
+	
+	MPI_Comm_rank( MPI_COMM_WORLD, &myrank);
+	MPI_Comm_size( MPI_COMM_WORLD, &size);
+	
+	if(myrank == 0)
+	{
+		timer_start();
+	}
+	
     /* Call the actual simulation that should be implemented in simulate.c. */
     ret = simulate(i_max, t_max, old, current, next);
-
-    time = timer_end();
-    printf("Took %g seconds\n", time);
-    printf("Normalized: %g seconds\n", time / (1. * i_max * t_max));
-
-    file_write_double_array("result.txt", ret, i_max);
-
+		
+    if(myrank == 0)
+	{
+		for (i=1; i < size){
+			int pos1, pos2, t;
+			t = i_max  / num_threads;
+			pos1 = t * (i + 1) - t + 1;
+			pos2 = t * (i + 1) ;
+			MPI_Recv(buffer, i_max, MPI_Double, i, ((i + 1) * 10 + 1), MPI_COMM_WORLD, &status);
+			for (; pos1 <= pos2 ; pos1++)
+			{
+				current[pos1] = buffer[pos1];
+			}
+			
+		}
+		time = timer_end();
+		printf("Took %g seconds\n", time);
+		printf("Normalized: %g seconds\n", time / (1. * i_max * t_max));
+	} else {
+		MPI_send(current, i_max, MPI_Double, i, ((i + 1) * 10 + 1), MPI_COMM_WORLD);
+	}
+	
+	
+	
     free(old);
     free(current);
     free(next);
-
+	
+	MPI_Finalize();
     return EXIT_SUCCESS;
 }
