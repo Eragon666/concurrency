@@ -5,7 +5,7 @@
 int MYMPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm communicator)
 {
 	int rank, size, tag, next, last = 0;
-		MPI_Status status;
+	MPI_Status status;
 
 	MPI_Comm_rank(communicator, &rank); // task id
 	MPI_Comm_size(communicator, &size); //size
